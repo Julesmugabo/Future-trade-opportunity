@@ -20,12 +20,12 @@ st.markdown("""This dashborad reveals Rwanda's export trends,forecast on how opp
 st.markdown("Developed by Jules Mugabushaka")
 
 #2. loading the data
-file_path= (r"C:\Users\PC\OneDrive\Desktop\Nisr project\2025Q2_Trade_report_annexTables.xlsx")
+file_path = "https://raw.githubusercontent.com/Julesmugabo/Future-trade-opportunity/main/2025Q2_Trade_report_annexTables.xlsx"
 
 #3. setting sidebar header
 st.sidebar.header("Mufaxa Traders")
 try: 
-    image = Image.open(r"C:\Users\PC\OneDrive\Desktop\Nisr project\mufaxa.jpg")
+    image = "https://github.com/Julesmugabo/Future-trade-opportunity/blob/main/mufaxa.jpg"
     st.sidebar.image(image, caption='Mufaxa Traders', width = 200)
 except:
     st.sidebar.markdown("### Your Company Logo")
@@ -305,7 +305,7 @@ if selected_page == "Machine Learning Model":
 
     # Optionally, display the bottom 10 (lowest predicted growth)
     st.dataframe(df_sorted[['Label','Predicted_Growth', 'total_growth']])
-    df_predictions = pd.read_csv(r"C:\Users\PC\OneDrive\Desktop\Nisr project\predictions.csv")
+    df_predictions = "https://github.com/Julesmugabo/Future-trade-opportunity/blob/main/predictions.csv"
 
 
     #------------------------
