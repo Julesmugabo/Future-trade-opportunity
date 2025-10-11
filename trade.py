@@ -1,3 +1,6 @@
+#----------------------------------------
+# DASHBOARD SCRIPT APP FOR RWANDA EXPORT ANALYSIS
+#----------------------------------------
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -5,6 +8,8 @@ import streamlit as st
 import seaborn as sns
 import joblib
 import io
+import plotly.express as px
+import plotly.graph_objects as go
 from PIL import Image
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
@@ -12,33 +17,30 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
+
 #1. Now the first thing is to make a page and its headers
-st.set_page_config(page_title="New opportunity in Rwandan Exports", layout ='wide')
+#--------------------------------------------------------
+st.set_page_config(page_title="Export opportunity in Rwanda", layout ='wide')
 st.title('Analysis on Rwandan Exports')
-st.markdown("""This dashborad reveals Rwanda's export trends,forecast on how opportunity can be got using Machine Learning models.
-             The data used is from the National Bank of Rwanda and the World Bank.""")
-st.markdown("Developed by Jules Mugabushaka")
 
-#2. loading the data
-file_path = "https://raw.githubusercontent.com/Julesmugabo/Future-trade-opportunity/main/2025Q2_Trade_report_annexTables.xlsx"
-
-#3. setting sidebar header
-st.sidebar.header("Mufaxa Traders")
+#-------------------------------------------------------------
+#3. SETTING SIDE BAR
+#-------------------------------------------------------------
+st.sidebar.header("NISR Trade opportunity project")
 try: 
     image = "https://github.com/Julesmugabo/Future-trade-opportunity/blob/main/mufaxa.jpg"
     st.sidebar.image(image, caption='Mufaxa Traders', width = 200)
 except:
-    st.sidebar.markdown("### Your Company Logo")
-    st.sidebar.caption("Add logo.png to project folder")
-
-st.sidebar.header("NISR Trade opportunity project")
+    st.sidebar.markdown("Mufaxa traders")
 
 
 
-# dictionary to store specific sheets that shall be used
+#--------------------------------------------------------------
+#2. LOADING DATA
+#--------------------------------------------------------------
+file_path = "https://raw.githubusercontent.com/Julesmugabo/Future-trade-opportunity/main/2025Q2_Trade_report_annexTables.xlsx"
 df_exports = pd.read_excel(file_path, sheet_name= 'ExportCountry')
 df_commodity = pd.read_excel(file_path,sheet_name = 'ExportsCommodity')
-
 
 all_sheets = {
     'ExportCountry': df_exports,
@@ -49,34 +51,34 @@ df_raw = pd.concat(all_sheets.values(), ignore_index=True)
 
 
 #----------------------------------------
-# SELECT BOX ARRANGEMENT
+# SIDEBAR ARRANGEMENT
 #----------------------------------------
-# Existing pages (like sheets)
 available_pages = ["overview","ExportsCommodity", "ExportCountry", "Machine Learning Model"]
-
-# Sidebar box with new page added
 selected_page = st.sidebar.selectbox("Select the page to explore", available_pages)
-
-# --- PAGE LOGIC ---
+#-------------------------------------------------------------
+# PAGE ARRANGEMENT
+#-------------------------------------------------------------
 if selected_page == "overview":
     st.title(" overview of the data that we have")
+    st.markdown("""This dashborad reveals Rwanda's export trends,forecast on how opportunity can be got using Machine Learning models.""")
+    st.markdown("Developed by Jules Mugabushaka")
     st.dataframe(df_raw)
+    st.download_button("Download Combined Data", df_raw.to_csv(index=False).encode(), "exports_combined.csv")
 
 if selected_page == "ExportsCommodity":
-    st.title(" Exports Commodity Page")
+    st.title(" Exports Commodity Analysis")
     df = pd.read_excel(file_path, sheet_name="ExportsCommodity")
     st.dataframe(df)
 
 if selected_page == "ExportCountry":
     st.title(" Export Country Page")
-    df = pd.read_excel(file_path, sheet_name="ExportCountry")
-    st.dataframe(df_raw)
+    dff = pd.read_excel(file_path, sheet_name="ExportCountry")
+    st.dataframe(dff)
 
 if selected_page == "Machine Learning Model":
-    st.title(" Machine Learning Model Results")
+    st.title("Machine Learning Forecast – Export Growth Prediction")
     df_predictions = pd.read_csv("predictions.csv")
-    st.dataframe(df_predictions)
-    st.write("Here you can add charts or ranking results from your model.")
+    st.write("""After computing machine learning models, here are the summary of the findings we can make good decision from""")
 
 #----------------------------------------
 # 4. LETS DO DATA CLEANING
@@ -88,7 +90,6 @@ for sheet_name in selected_sheet:
 
 #4.c arranging well time columns
 # Identify time columns (e.g. 2023Q1, 2024Q2, etc.)
-# Identify time columns for ExportCountry
 time_columns_country = [c for c in all_sheets['ExportCountry'].columns if str(c).strip().startswith('202') and 'Q' in str(c)]
 if not time_columns_country:
     time_columns_country = list(all_sheets['ExportCountry'].columns[1:11])
@@ -100,8 +101,9 @@ if not time_columns_commodity:
 
 
 # 4.5 creating working dataframe
-
-# --- For ExportCountry ---
+#--------------------------------------------------------------
+# For ExportCountry 
+#--------------------------------------------------------------
 sheet_name = 'ExportCountry'
 df0_country = all_sheets[sheet_name]
 df0_country.rename(columns={df0_country.columns[0]: 'Label'}, inplace=True)
@@ -109,8 +111,9 @@ time_columns_country = [c for c in df0_country.columns if str(c).strip().startsw
 if not time_columns_country:
     time_columns_country = list(df0_country.columns[1:11])
 working_df_country = df0_country[['Label'] + time_columns_country].copy()
-
-# --- For ExportsCommodity ---
+#--------------------------------------------------------------
+# For ExportsCommodity
+#--------------------------------------------------------------
 sheet_name = 'ExportsCommodity'
 df0_commodity = all_sheets[sheet_name]
 df0_commodity.rename(columns={df0_commodity.columns[0]: 'Label'}, inplace=True)
@@ -119,7 +122,7 @@ if not time_columns_commodity:
     time_columns_commodity = list(df0_commodity.columns[1:11])
 working_df_commodity = df0_commodity[['Label'] + time_columns_commodity].copy()
 
-# --- For ExportCountry ---
+# For ExportCountry 
 working_country = working_df_country.copy()
 working_numeric_country = working_country.set_index('Label').apply(pd.to_numeric, errors='coerce').fillna(0)
 
@@ -130,7 +133,7 @@ data_for_area_country = working_numeric_country.loc[top_labels_by_latest_country
 data_T_country = data_for_area_country.T
 
 
-# --- For ExportsCommodity ---
+# For ExportsCommodity 
 working_commodity = working_df_commodity.copy()
 working_numeric_commodity = working_commodity.set_index('Label').apply(pd.to_numeric, errors='coerce').fillna(0)
 
@@ -141,105 +144,162 @@ data_for_area_commodity = working_numeric_commodity.loc[top_labels_by_latest_com
 data_T_commodity = data_for_area_commodity.T
 
 
-
 #------------------------------
 # GRAPHS FOR COMMODITYEXPORTS
 #------------------------------
 if selected_page == "ExportsCommodity":
+    import plotly.express as px
+    import plotly.graph_objects as go
+
     st.title("Exports Commodity Page")
-    r1c1, r1c2 = st.columns([1,1])
-    with r1c1:
-        st.caption("Stacked area: Top 8 labels")
+    # Tabs
+    tab1, tab2, tab3 = st.tabs(["Stacked Area", "Top 10 Bar", "Pie Share"])
+    with tab1:
+        st.caption("Stacked area for big 8 lables")
         try:
-            fig, ax = plt.subplots(figsize=(5,3))
-            # Make sure shapes match: x length = rows of data_T, y arrays per label must align
             x = data_T_commodity.index
-            y = data_T_commodity.values.T  # shape: (n_labels, n_periods)
-            ax.stackplot(x, y, labels=data_T_commodity.columns)
-            ax.set_xticks(x[::max(1, int(len(x)/4))])
-            ax.tick_params(axis='x', labelrotation=45)
-            ax.set_title("Top 8 Labels")
-            ax.legend(loc='upper left', fontsize='small', bbox_to_anchor=(1,1))
-            st.pyplot(fig)
+            y = data_T_commodity.values.T  
+
+            fig = go.Figure()
+            for col in data_T_commodity.columns:
+                fig.add_trace(go.Scatter(
+                    x=x, 
+                    y=data_T_commodity[col], 
+                    mode='lines',
+                    stackgroup='one', 
+                    name=col
+                ))
+
+            fig.update_layout(
+                title="Top 8 Labels",
+                xaxis_title="Period",
+                yaxis_title="Value",
+                legend_title="Labels",
+                height=300
+            )
+            st.plotly_chart(fig, use_container_width=True)
         except Exception as e:
             st.warning(f"Couldn't draw stacked area: {e}")
 
-    with r1c2:
-        st.caption("Top 10 latest values")
+    with tab2:
+        st.caption("Big 10 latest values")
         try:
-            fig2, ax2 = plt.subplots(figsize=(5,3))
-            latest_col =working_numeric_commodity.columns[-1]
-            working_numeric_commodity[latest_col].nlargest(10).sort_values().plot(kind='barh', ax=ax2)
-            ax2.set_title(f"Top 10 — {-1}")
-            st.pyplot(fig2)
+            latest_col = working_numeric_commodity.columns[-1]
+            top10 = working_numeric_commodity[latest_col].nlargest(10).sort_values()
+
+            fig2 = px.bar(
+                x=top10.values,
+                y=top10.index,
+                orientation='h',
+                title=f"Top 10 — {latest_col}",
+                color=top10.values,
+                color_continuous_scale='Blues'
+            )
+            fig2.update_layout(height=300, xaxis_title="Value", yaxis_title="")
+            st.plotly_chart(fig2, use_container_width=True)
         except Exception as e:
             st.warning(f"Couldn't draw top 10 bar: {e}")
 
-    # Row 2
-    r2c1, r2c2 = st.columns([1,1])
-    with r2c1:
-        st.caption("Share distribution among top 6 (compact pie)")
+    with tab3:
+        st.caption("Distribution sharing")
         try:
-            top6 =top6 = working_numeric_commodity.iloc[:, -1].astype(float).nlargest(6)
-            fig3, ax3 = plt.subplots(figsize=(5,3))
-            ax3.pie(top6, labels=top6.index, autopct='%1.0f%%', startangle=140)
-            ax3.set_title("Top 6 share (latest)")
-            st.pyplot(fig3)
+            top6 = working_numeric_commodity.iloc[:, -1].astype(float).nlargest(6)
+
+            fig3 = px.pie(
+                names=top6.index,
+                values=top6.values,
+                title="Top 6 share (latest)",
+                hole=0.3
+            )
+            fig3.update_traces(textinfo='percent+label')
+            fig3.update_layout(height=300)
+            st.plotly_chart(fig3, use_container_width=True)
         except Exception as e:  
             st.warning(f"Couldn't draw pie: {e}")
 
+    st.download_button("Download Commodity Data",
+                       working_numeric_commodity.to_csv().encode(),
+                       "commodity_exports.csv")
 
+#------------------------------
 # GRAPHS FOR EXPORTCOUNTRIES
 #------------------------------
 if selected_page == "ExportCountry":
+    import plotly.express as px
+    import plotly.graph_objects as go
+
     st.title("Export Country Page")
-    r1c1, r1c2 = st.columns([1,1])
-    with r1c1:
-        st.caption("Stacked area: Top 8 labels")
+    tab1, tab2, tab3 = st.tabs(["Stacked Area", "Top 10 Bar", "Pie Share"])
+    with tab1:
+        st.caption("Stacked area chart")
         try:
-            fig, ax = plt.subplots(figsize=(5,3))
-            # Make sure shapes match: x length = rows of data_T, y arrays per label must align
-            x =data_T_country.index
+            x = data_T_country.index
             y = data_T_country.values.T  # shape: (n_labels, n_periods)
-            ax.stackplot(x, y, labels=data_T_country.columns)
-            ax.set_xticks(x[::max(1, int(len(x)/4))])
-            ax.tick_params(axis='x', labelrotation=45)
-            ax.set_title("Top 8 Labels")
-            ax.legend(loc='upper left', fontsize='small', bbox_to_anchor=(1,1))
-            st.pyplot(fig)
+
+            fig = go.Figure()
+            for col in data_T_country.columns:
+                fig.add_trace(go.Scatter(
+                    x=x, 
+                    y=data_T_country[col], 
+                    mode='lines',
+                    stackgroup='one', 
+                    name=col
+                ))
+
+            fig.update_layout(
+                title="Top 8 Labels",
+                xaxis_title="Period",
+                yaxis_title="Value",
+                legend_title="Labels",
+                height=300
+            )
+            st.plotly_chart(fig, use_container_width=True)
         except Exception as e:
             st.warning(f"Couldn't draw stacked area: {e}")
 
-    with r1c2:
+    with tab2:
         st.caption("Top 10 latest values")
         try:
-            fig2, ax2 = plt.subplots(figsize=(5,3))
             latest_col = working_numeric_country.columns[-1]
-            working_numeric_country[latest_col].nlargest(10).sort_values().plot(kind='barh', ax=ax2)
-            ax2.set_title(f"Top 10 — {-1}")
-            st.pyplot(fig2)
+            top10 = working_numeric_country[latest_col].nlargest(10).sort_values()
+
+            fig2 = px.bar(
+                x=top10.values,
+                y=top10.index,
+                orientation='h',
+                title=f"Top 10 — {latest_col}",
+                color=top10.values,
+                color_continuous_scale='Blues'
+            )
+            fig2.update_layout(height=300, xaxis_title="Value", yaxis_title="")
+            st.plotly_chart(fig2, use_container_width=True)
         except Exception as e:
             st.warning(f"Couldn't draw top 10 bar: {e}")
 
-    # Row 2
-    r2c1, r2c2 = st.columns([1,1])
-    with r2c1:
-        st.caption("Share distribution among top 6 (compact pie)")
+    with tab3:
+        st.caption("Distribution sharing")
         try:
-            top6 =top6 = working_numeric_country.iloc[:, -1].astype(float).nlargest(6)
-            fig3, ax3 = plt.subplots(figsize=(5,3))
-            ax3.pie(top6, labels=top6.index, autopct='%1.0f%%', startangle=140)
-            ax3.set_title("Top 6 share (latest)")
-            st.pyplot(fig3)
+            top6 = working_numeric_country.iloc[:, -1].astype(float).nlargest(6)
+
+            fig3 = px.pie(
+                names=top6.index,
+                values=top6.values,
+                title="Top 6 share (latest)",
+                hole=0.3
+            )
+            fig3.update_traces(textinfo='percent+label')
+            fig3.update_layout(height=300)
+            st.plotly_chart(fig3, use_container_width=True)
         except Exception as e:  
             st.warning(f"Couldn't draw pie: {e}")
 
-# -------------------------------
+    st.download_button(" Download Country Data",
+                       working_numeric_country.to_csv().encode(),
+                       "export_country.csv")
+
+#---------------------------------
 # MACHINE LEARNING SECTION
 #---------------------------------
-
-# Load the two sheets
-# Read and merge
 if selected_page == "Machine Learning Model":
     df1 = pd.read_excel(file_path, sheet_name="ExportsCommodity")
     df2 = pd.read_excel(file_path, sheet_name="ExportCountry")
@@ -248,8 +308,8 @@ if selected_page == "Machine Learning Model":
     merged_df = merged_df.rename(columns={'Year and Period': 'Label'})
 
     df = merged_df
-    # lets create growth change featuress of all quarters
 
+    # Create growth change features
     df['2023Q2_growth'] = (df['2023Q2'] - df['2023Q1']) / df['2023Q1']
     df['2023Q3_growth'] = (df['2023Q3'] - df['2023Q2']) / df['2023Q2']
     df['2023Q4_growth'] = (df['2023Q4'] - df['2023Q3']) / df['2023Q3']
@@ -260,10 +320,10 @@ if selected_page == "Machine Learning Model":
     df['2025Q1_growth'] = (df['2025Q1'] - df['2024Q4']) / df['2024Q4']
     df['2025Q2_growth'] = (df['2025Q2'] - df['2025Q1']) / df['2025Q1']
 
-    # Create total overall growth from first to last quarter
+    # Total growth
     df['total_growth'] = (df['2025Q2'] - df['2023Q1']) / df['2023Q1']
 
-    # Select features (all quarterly values and growth columns except total_growth)
+    # Features and target
     X = df[['2023Q1', '2023Q2', '2023Q3', '2023Q4',
             '2024Q1', '2024Q2', '2024Q3', '2024Q4',
             '2025Q1', '2025Q2',
@@ -271,83 +331,89 @@ if selected_page == "Machine Learning Model":
             '2024Q1_growth', '2024Q2_growth', '2024Q3_growth',
             '2024Q4_growth', '2025Q1_growth', '2025Q2_growth']]
 
-    # Select target (the growth we want to predict or rank by)
     y = df['total_growth']
 
-
-    # now we are going to train a regression model that will predict growth
-
+    # Train model
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
 
-    # Create and train the model
     model = RandomForestRegressor(random_state=42)
     model.fit(X_train, y_train)
-
-    # Make predictions
     y_pred = model.predict(X_test)
 
-    # Evaluate how well the model performs
+    # Model evaluation
     st.write("R² Score:", r2_score(y_test, y_pred))
     st.write("Mean Absolute Error:", mean_absolute_error(y_test, y_pred))
 
-    # Predict total growth for all entities (for ranking later)
+    # Predict total growth
     df['Predicted_Growth'] = model.predict(X)
 
-    # then lets rank and see top investment opportunities
-    # Sort all entities by predicted growth (highest first)
     df_sorted = df.sort_values(by='Predicted_Growth', ascending=False)
-
-    # Display the top 10 opportunities
-    print("Top 10 Investment Opportunities:")
-    print(df_sorted[['Predicted_Growth', 'total_growth']].head(10))
-
-    # Optionally, display the bottom 10 (lowest predicted growth)
     st.dataframe(df_sorted[['Label','Predicted_Growth', 'total_growth']])
     df_predictions = "https://github.com/Julesmugabo/Future-trade-opportunity/blob/main/predictions.csv"
 
 
     #------------------------
-    # ml graphs
+    # GRAPHS
     #-------------------------
-    # Lets make graph that shows comparison of growth
+
+    # 1️⃣ Comparison: Actual vs Predicted Growth
     st.subheader("Comparison: Actual vs Predicted Growth")
 
     df_comparison = df.sort_values(by='Predicted_Growth', ascending=False).head(10)
-    fig, ax = plt.subplots(figsize=(4, 3),dpi=100)
-    x = np.arange(len(df_comparison['Label']))
-    width = 0.35
 
-    ax.bar(x - width/2, df_comparison['total_growth'], width, label='Actual Growth', color='lightgreen')
-    ax.bar(x + width/2, df_comparison['Predicted_Growth'], width, label='Predicted Growth', color='steelblue')
-    ax.set_xticks(x)
-    ax.set_xticklabels(df_comparison['Label'], rotation=45, ha='right')
-    ax.set_xlabel("Country / Commodity")
-    ax.set_ylabel("Growth Rate")
-    ax.set_title("Actual vs Predicted Growth (Top 10)")
-    ax.legend()
-    st.pyplot(fig, use_container_width=False)
+    fig1 = go.Figure(data=[
+        go.Bar(name='Actual Growth', x=df_comparison['Label'], y=df_comparison['total_growth'],
+               marker_color='lightgreen'),
+        go.Bar(name='Predicted Growth', x=df_comparison['Label'], y=df_comparison['Predicted_Growth'],
+               marker_color='steelblue')
+    ])
+    fig1.update_layout(
+        barmode='group',
+        title="Actual vs Predicted Growth (Top 10)",
+        xaxis_title="Country / Commodity",
+        yaxis_title="Growth Rate",
+        xaxis_tickangle=-45,
+        legend_title_text='Growth Type',
+        height=400
+    )
+    st.plotly_chart(fig1, use_container_width=True)
 
-    # we are going to make another graph
-    st.write(" Feature opportunities where we can invest either as a country or a certain commodity") 
-    # Select top 10
+
+    # 2️⃣ Top 10 Predicted Growth – Investment Opportunities
+    st.write("Feature opportunities where we can invest either as a country or a certain commodity")
     top10 = df_sorted[['Label', 'Predicted_Growth', 'total_growth']].head(10)
-    # --- Plot bar chart for top 10 predicted growth ---
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.barh(top10['Label'], top10['Predicted_Growth'], color='skyblue')
-    ax.invert_yaxis()  # So highest value appears at top
-    ax.set_xlabel("Predicted Growth Rate")
-    ax.set_ylabel("Country / Commodity")
-    ax.set_title("Top 10 Predicted Growth – Investment Opportunities")
-    st.pyplot(fig)
 
-    # Model performance graph and how its trust worthy
-    st.write('This is a graph that shows how well our model is fitting and be trusted')
-    fig, ax = plt.subplots()
-    ax.scatter(y_test, y_pred, alpha=0.7)
-    ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--')
-    ax.set_xlabel("Actual Growth")
-    ax.set_ylabel("Predicted Growth")
-    ax.set_title("Actual vs Predicted Growth")
-    st.pyplot(fig)
+    fig2 = px.bar(
+        top10,
+        y='Label',
+        x='Predicted_Growth',
+        orientation='h',
+        color='Predicted_Growth',
+        color_continuous_scale='Blues',
+        title="Top 10 Predicted Growth – Investment Opportunities"
+    )
+    fig2.update_layout(height=400)
+    st.plotly_chart(fig2, use_container_width=True)
+
+
+    # 3️⃣ Model performance: Actual vs Predicted scatter
+    st.write('This is a graph that shows how well our model is fitting and can be trusted')
+
+    fig3 = px.scatter(
+        x=y_test,
+        y=y_pred,
+        labels={'x': 'Actual Growth', 'y': 'Predicted Growth'},
+        title="Actual vs Predicted Growth"
+    )
+    fig3.add_trace(go.Scatter(
+        x=[min(y_test), max(y_test)],
+        y=[min(y_test), max(y_test)],
+        mode='lines',
+        name='Perfect Fit',
+        line=dict(color='red', dash='dash')
+    ))
+    fig3.update_traces(marker=dict(size=8, opacity=0.7))
+    fig3.update_layout(height=400)
+    st.plotly_chart(fig3, use_container_width=True)
