@@ -28,10 +28,10 @@ st.title('Analysis on Rwandan Exports')
 #-------------------------------------------------------------
 st.sidebar.header("NISR Trade opportunity project")
 try: 
-    image = "https://github.com/Julesmugabo/Future-trade-opportunity/blob/main/Logo.png"
-    st.sidebar.image(image, caption='Mufaxa Traders', width = 200)
+    image = "https://raw.githubusercontent.com/Julesmugabo/Future-trade-opportunity/main/Logo.png"
+    st.sidebar.image(image, caption='Mufaxa Traders', width=200)
 except:
-    st.sidebar.markdown("Mufaxa traders")
+    st.sidebar.markdown("Mufaxa Traders")
 
 
 
