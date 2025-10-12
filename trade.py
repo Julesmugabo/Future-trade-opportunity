@@ -620,6 +620,8 @@ if selected_page == "Youth & SME Engagement":
     name = st.text_input("Your name")
     status = st.text_input("youth or SME")
     business = st.text_input("Your Business or Startup Name")
+    email = st.text_input("Email:")
+    phone_number = st.text_input("Phone number")
     interest = st.text_area(" Are you intrested in getting a loan from Mufaxa traders or capacity building")
     if st.button("Submit"):
         st.success("Thank you for your submission.")
