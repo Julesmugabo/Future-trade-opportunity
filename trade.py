@@ -21,7 +21,7 @@ from sklearn.preprocessing import StandardScaler
 #1. Now the first thing is to make a page and its headers
 #--------------------------------------------------------
 st.set_page_config(page_title="Export opportunity in Rwanda", layout ='wide')
-st.title('Analysis on Rwandan Exports')
+st.title('Rwandan Exports Analysis')
 
 #-------------------------------------------------------------
 #3. SETTING SIDE BAR
@@ -53,13 +53,13 @@ df_raw = pd.concat(all_sheets.values(), ignore_index=True)
 #----------------------------------------
 # SIDEBAR ARRANGEMENT
 #----------------------------------------
-available_pages = ["overview","ExportsCommodity", "ExportCountry", "ExportsCommodity prediction model", "ExportCountry prediction model", "Youth & SME Engagement"]
+available_pages = ["overview","Commodity exports.", "Country exports", "Commodity prediction model", "Country prediction model", "Youth & SME Engagement"]
 selected_page = st.sidebar.selectbox("Select the page to explore", available_pages)
 #-------------------------------------------------------------
 # PAGE ARRANGEMENT
 #-------------------------------------------------------------
 if selected_page == "overview":
-    st.title(" overview of the data that we have")
+    st.title(" Data overview")
     
     st.markdown("""This dashboard walks you through the analysis on Rwanda's export performance either in commodities exported or destination of those commodities.
                  **Its aim is to predict countries and commodites that if we invest in now we shall make a good profit out of it**.
@@ -75,17 +75,17 @@ if selected_page == "overview":
     st.download_button("Download commodities exported Data", df_exports.to_csv(index=False).encode(), "Commodity_exported.csv")
 
 
-if selected_page == "ExportsCommodity":
+if selected_page == "Commodity exports":
     st.title(" Exports Commodity Analysis")
     df = pd.read_excel(file_path, sheet_name="ExportsCommodity")
     st.dataframe(df)
 
-if selected_page == "ExportCountry":
+if selected_page == "Country exports":
     st.title(" Export Country Page")
     dff = pd.read_excel(file_path, sheet_name="ExportCountry")
     st.dataframe(dff)
 
-if selected_page == "ExportsCommodity prediction model":
+if selected_page == "Commodity prediction model":
     st.title("Machine Learning Forecast – ExportsCommodity Growth Prediction")
     df_predictions = pd.read_csv("predictions.csv")
 
@@ -163,7 +163,7 @@ data_T_commodity = data_for_area_commodity.T
 #------------------------------
 # GRAPHS FOR COMMODITYEXPORTS
 #------------------------------
-if selected_page == "ExportsCommodity":
+if selected_page == "Commodity exports":
 
     st.title("Exports Commodity Page")
     # Tabs
@@ -247,7 +247,7 @@ if selected_page == "ExportsCommodity":
 #------------------------------     
 # GRAPHS FOR EXPORTCOUNTRIES
 #------------------------------
-if selected_page == "ExportCountry":
+if selected_page == "Country exports":
     import plotly.express as px
     import plotly.graph_objects as go
 
@@ -323,7 +323,7 @@ if selected_page == "ExportCountry":
 #---------------------------------
 # EXPORT COUNTRIES MACHINE LEARNING SECTION
 #---------------------------------
-if selected_page == "ExportCountry prediction model":
+if selected_page == "Country prediction model":
     df2 = pd.read_excel(file_path, sheet_name="ExportCountry")
     df2 = df2.rename(columns={'Year and Period': 'Label'})
 
@@ -399,7 +399,7 @@ if selected_page == "ExportCountry prediction model":
         st.plotly_chart(fig1, use_container_width=True)
         st.markdown("""From this graph we can see there is a hidden opportunity in investing our exports to Thailand. so our next move would be to define which goods are predicted to be imported in Thailaand so that we fcan start preparing them now.""")
     with tab2:
-        # 2️⃣ Top 10 Predicted Growth – Investment Opportunities
+        # 2️ Top 10 Predicted Growth – Investment Opportunities
         st.write("Top 10 countries that will be good for our next investment")
         top10 = df_sorted[['Label', 'Predicted_Growth', 'total_growth']].head(10)
 
@@ -416,7 +416,7 @@ if selected_page == "ExportCountry prediction model":
         st.plotly_chart(fig2, use_container_width=True)
 
     with tab3:
-        # 3️⃣ Model performance: Actual vs Predicted scatter
+        # 3️ Model performance: Actual vs Predicted scatter
         st.write('This is a graph that shows how well our model is fitting and can be trusted')
 
         fig3 = px.scatter(
@@ -438,7 +438,7 @@ if selected_page == "ExportCountry prediction model":
 #---------------------------------
 # COMMODITY MACHINE LEARNING SECTION 
 #---------------------------------
-if selected_page == "ExportsCommodity prediction model":
+if selected_page == "Commodity prediction model":
     df1 = pd.read_excel(file_path, sheet_name="ExportsCommodity")
     df1 = df1.rename(columns={'Year and Period': 'Label'})
     # Create growth change features
@@ -491,7 +491,7 @@ if selected_page == "ExportsCommodity prediction model":
     #-------------------------
     tab1, tab2, tab3 = st.tabs(["Prediction comparison", "Commodities with opportunity", "Model perfomance"])
     with tab1:
-        # 1️⃣ Comparison: Actual vs Predicted Growth
+        # 1 Comparison: Actual vs Predicted Growth
         st.subheader("Comparison: Actual vs Predicted Growth")
 
         df1_comparison = df1.sort_values(by='Predicted_Growth', ascending=False).head(10)
@@ -521,7 +521,7 @@ if selected_page == "ExportsCommodity prediction model":
                     since we expect to export in high quantity in the future. so its better we can invest in their preparation so that when time comes, we can be able to make good sales out of them.
                     """)
     with tab2:
-        # 2️⃣ Top 10 Predicted Growth – Investment Opportunities
+        # 2 Top 10 Predicted Growth – Investment Opportunities
         st.write("Feature opportunities where we can invest either as a country or a certain commodity")
         Top_10_commodities = df1_sorted[['Label', 'Predicted_Growth', 'total_growth']].head(10)
 
@@ -545,7 +545,7 @@ if selected_page == "ExportsCommodity prediction model":
                     since we expect to export in high quantity in the future. so its better we can invest in their preparation so that when time comes, we can be able to make good sales out of them.
                     """)
     with tab3:
-        # 3️⃣ Model performance: Actual vs Predicted scatter
+        # Model performance: Actual vs Predicted scatter
         st.write('This is a graph that shows how well our model is fitting and can be trusted')
 
         fig3 = px.scatter(
