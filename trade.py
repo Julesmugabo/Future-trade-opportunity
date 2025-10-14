@@ -53,7 +53,7 @@ df_raw = pd.concat(all_sheets.values(), ignore_index=True)
 #----------------------------------------
 # SIDEBAR ARRANGEMENT
 #----------------------------------------
-available_pages = ["overview","Commodity exports.", "Country exports", "Commodity prediction model", "Country prediction model", "Youth & SME Engagement"]
+available_pages = ["overview","Commodity exports", "Country exports", "Commodity prediction model", "Country prediction model", "Policy recommendation","Youth & SME Engagement"]
 selected_page = st.sidebar.selectbox("Select the page to explore", available_pages)
 #-------------------------------------------------------------
 # PAGE ARRANGEMENT
@@ -61,36 +61,39 @@ selected_page = st.sidebar.selectbox("Select the page to explore", available_pag
 if selected_page == "overview":
     st.title(" Data overview")
     
-    st.markdown("""This dashboard walks you through the analysis on Rwanda's export performance either in commodities exported or destination of those commodities.
-                 **Its aim is to predict countries and commodites that if we invest in now we shall make a good profit out of it**.
-                This analysis is to help us make a good choice of a country or a commodity.""")
+    st.markdown("""The aim of this dashboard is to predict countries and commodites that if we invest in now we shall make a good profit out of it from 2025Q3 - 2026Q4**.""")
     
-    st.markdown("""This is the dataset that contains the data for country destination of our exports.""")
+    st.markdown("""Below is Rwanda Exports destination countries dataset used.""")
     
     st.dataframe(df_exports)
     
     st.download_button("Download export destination Data", df_exports.to_csv(index=False).encode(), "exports_destination.csv")
-    st.markdown("""This is the dataset that contains the data for commodities exported from Rwanda""")
+    st.markdown("""Commodities exported from Rwanda dataset.""")
     st.dataframe(df_commodity)
     st.download_button("Download commodities exported Data", df_exports.to_csv(index=False).encode(), "Commodity_exported.csv")
 
 
 if selected_page == "Commodity exports":
     st.title(" Exports Commodity Analysis")
-    df = pd.read_excel(file_path, sheet_name="ExportsCommodity")
-    st.dataframe(df)
+    st.dataframe(df_commodity)
 
 if selected_page == "Country exports":
     st.title(" Export Country Page")
-    dff = pd.read_excel(file_path, sheet_name="ExportCountry")
-    st.dataframe(dff)
+    st.dataframe(df_exports)
 
 if selected_page == "Commodity prediction model":
     st.title("Machine Learning Forecast – ExportsCommodity Growth Prediction")
     df_predictions = pd.read_csv("predictions.csv")
 
+if selected_page == "Country prediction model":
+    st.title("Machine Learning Forecast on countries")
+    df_predictions = pd.read_csv("predictions.csv")
+
 if selected_page == "Youth & SME Engagement":
     st.title("Youth and SME engagement")
+
+if selected_page == "Policy recommendation":
+    st.title("Policy recomendation")
     
     
 
@@ -164,7 +167,6 @@ data_T_commodity = data_for_area_commodity.T
 # GRAPHS FOR COMMODITYEXPORTS
 #------------------------------
 if selected_page == "Commodity exports":
-
     st.title("Exports Commodity Page")
     # Tabs
     tab1, tab2, tab3 = st.tabs(["Line chart", "Bar chart", "Pie Shart"])
@@ -248,8 +250,6 @@ if selected_page == "Commodity exports":
 # GRAPHS FOR EXPORTCOUNTRIES
 #------------------------------
 if selected_page == "Country exports":
-    import plotly.express as px
-    import plotly.graph_objects as go
 
     st.title("Export Country Page")
     tab1, tab2, tab3 = st.tabs(["Stacked Area", "Bar chart", "Pie Shart"])
@@ -257,7 +257,7 @@ if selected_page == "Country exports":
         st.caption("Stacked area chart")
         try:
             x = data_T_country.index
-            y = data_T_country.values.T  # shape: (n_labels, n_periods)
+            y = data_T_country.values.T  
 
             fig = go.Figure()
             for col in data_T_country.columns:
@@ -368,10 +368,16 @@ if selected_page == "Country prediction model":
     # Predict total growth
     df['Predicted_Growth'] = model.predict(X)
 
+    #predictions to 2026
+    df['Pred_2025Q3'] = df['2025Q2'] * (1 + df['Predicted_Growth'])
+    df['Pred_2025Q4'] = df['Pred_2025Q3'] * (1 + df['Predicted_Growth'])
+    df['Pred_2026Q1'] = df['Pred_2025Q4'] * (1 + df['Predicted_Growth'])
+    df['Pred_2026Q2'] = df['Pred_2026Q1'] * (1 + df['Predicted_Growth'])
+    df['Pred_2026Q3'] = df['Pred_2026Q2'] * (1 + df['Predicted_Growth'])
+    df['Pred_2026Q4'] = df['Pred_2026Q3'] * (1 + df['Predicted_Growth'])
     df_sorted = df.sort_values(by='Predicted_Growth', ascending=False)
-    st.dataframe(df_sorted[['Label','Predicted_Growth', 'total_growth']])
-
-
+    st.dataframe(df[['Label', '2025Q2', 'Pred_2025Q3','Pred_2026Q2', 'Pred_2026Q4', 'Predicted_Growth']])
+    
     #------------------------
     # GRAPHS
     #-------------------------
@@ -481,9 +487,15 @@ if selected_page == "Commodity prediction model":
     st.markdown("""Mean Absolute Error = 0.65 means that our model has high accuracy because it deviate from true values by only 0.66 units""")
     # Predict total growth
     df1['Predicted_Growth'] = model_df1.predict(X_df1)
+    df1['Pred_2025Q3'] = df1['2025Q2'] * (1 + df1['Predicted_Growth'])
+    df1['Pred_2025Q4'] = df1['Pred_2025Q3'] * (1 + df1['Predicted_Growth'])
+    df1['Pred_2026Q1'] = df1['Pred_2025Q4'] * (1 + df1['Predicted_Growth'])
+    df1['Pred_2026Q2'] = df1['Pred_2026Q1'] * (1 + df1['Predicted_Growth'])
+    df1['Pred_2026Q3'] = df1['Pred_2026Q2'] * (1 + df1['Predicted_Growth'])
+    df1['Pred_2026Q4'] = df1['Pred_2026Q3'] * (1 + df1['Predicted_Growth'])
 
     df1_sorted = df1.sort_values(by='Predicted_Growth', ascending=False)
-    st.dataframe(df1_sorted[['Label','Predicted_Growth', 'total_growth']])
+    st.dataframe(df1[['Label', '2025Q2', 'Pred_2025Q3','Pred_2026Q2', 'Pred_2026Q4', 'Predicted_Growth']])
 
 
     #------------------------
@@ -565,20 +577,14 @@ if selected_page == "Commodity prediction model":
         fig3.update_layout(height=400)
         st.plotly_chart(fig3, use_container_width=True)
 
+
 #-----------------------------------------------------------
-# Youth and SME Engagement
+# POLICY RECOMENDATION
 #-----------------------------------------------------------
-if selected_page == "Youth & SME Engagement":
+if selected_page == "Policy recommendation":
     st.markdown("""
-    ### Engaging in Rwanda’s Growing Trade Opportunities by  
-
-
-    This is a **call to action** for all **Rwandan youth** and **small & medium-sized enterprises (SMEs)** to seize the opportunities available in **export trade**.  
-    Through informed decision-making and data-driven insights, every participant can **grow an existing business** or **launch a new one** with confidence about **where and how to export**.  
-
-    ---
-
-    ###  Key Insights from Our Analysis
+    ### Policies to enhance Rwanda's Export Opportunities (2025-2026)
+        ###  Key Insights from Our Analysis
     Our analysis reveals **promising export opportunities** for Rwandan investors:  
 
     - **Thailand and Sweden** have emerged as highly potential markets:  
@@ -592,6 +598,25 @@ if selected_page == "Youth & SME Engagement":
     with expected export growth of around **11%**.
 
     These insights confirm that **Rwanda’s export sector is expanding** — and those who act now will benefit the most.
+
+                ### Policies to apply.        
+            - Rwanda should make trade agreement with Thailand and Sweden about tax reduction and improved logistics on its exports.
+            - Governmental organisations can help providing market research analysis to Rwandan traders.
+            - Promote agro industries among small and medium sized  busineses
+            - Funding agricultural projects made by youth
+            - Developing manufucturing industrie    
+                """)
+#-----------------------------------------------------------
+# Youth and SME Engagement
+#-----------------------------------------------------------
+if selected_page == "Youth & SME Engagement":
+    st.markdown("""
+    ### Engaging in Rwanda’s Growing Trade Opportunities by  
+           
+                
+    This is a **call to action** for all **Rwandan youth** and **small & medium-sized enterprises (SMEs)** to seize the opportunities available in **export trade**.  
+    Through informed decision-making and data-driven insights, every participant can **grow an existing business** or **launch a new one** with confidence about **where and how to export**.  
+
 
     ---
 
@@ -625,3 +650,8 @@ if selected_page == "Youth & SME Engagement":
     interest = st.text_area(" Are you intrested in getting a loan from Mufaxa traders or capacity building")
     if st.button("Submit"):
         st.success("Thank you for your submission.")
+
+
+############################################
+#############################################3
+# =====================================
