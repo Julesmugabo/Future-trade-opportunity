@@ -172,7 +172,7 @@ data_T_commodity = data_for_area_commodity.T
 if selected_page == "Commodity exports":
     st.title("Exports Commodity Page")
     # Tabs
-    tab1, tab2, tab3 = st.tabs(["Line chart", "Bar chart", "Pie Shart"])
+    tab1, tab2, tab3 = st.tabs(["Line chart", "Bar chart"])
     with tab1:
         st.caption("Line chart for top 8 commodities")
         try:
@@ -228,26 +228,7 @@ if selected_page == "Commodity exports":
                     From this graph we easly discover leading sectors that contributes to the GDP of Rwanda.
                     
                     we see that Rwanda's top Export commodity is manufactured materials and goods.  """)
-    with tab3:
-        st.caption("Distribution sharing")
-        try:
-            top6 = working_numeric_commodity.iloc[:, -1].astype(float).nlargest(11)
 
-            fig3 = px.pie(
-                names=top6.index,
-                values=top6.values,
-                title="Top 6 share (latest)",
-                hole=0.3
-            )
-            fig3.update_traces(textinfo='percent+label')
-            fig3.update_layout(height=500)
-            st.plotly_chart(fig3, use_container_width=True)
-        except Exception as e:  
-            st.warning(f"Couldn't draw pie: {e}")
-            st.markdown("""This graph shows its percentage contribution to others in same set.""")
-    st.download_button("Download Commodity Data",
-                       working_numeric_commodity.to_csv().encode(),
-                       "commodity_exports.csv")
                 
 #------------------------------     
 # GRAPHS FOR EXPORTCOUNTRIES
@@ -255,7 +236,7 @@ if selected_page == "Commodity exports":
 if selected_page == "Country exports":
 
     st.title("Export Country Page")
-    tab1, tab2, tab3 = st.tabs(["Stacked Area", "Bar chart", "Pie Shart"])
+    tab1, tab2, tab3 = st.tabs(["Stacked Area", "Bar chart"])
     with tab1:
         st.caption("Stacked area chart")
         try:
@@ -302,26 +283,6 @@ if selected_page == "Country exports":
         except Exception as e:
             st.warning(f"Couldn't draw top 10 bar: {e}")
 
-    with tab3:
-        st.caption("Distribution sharing")
-        try:
-            top6 = working_numeric_country.iloc[:, -1].astype(float).nlargest(6)
-
-            fig3 = px.pie(
-                names=top6.index,
-                values=top6.values,
-                title="Top 6 share (latest)",
-                hole=0.3
-            )
-            fig3.update_traces(textinfo='percent+label')
-            fig3.update_layout(height=300)
-            st.plotly_chart(fig3, use_container_width=True)
-        except Exception as e:  
-            st.warning(f"Couldn't draw pie: {e}")
-
-    st.download_button(" Download Country Data",
-                       working_numeric_country.to_csv().encode(),
-                       "export_country.csv")
 
 #---------------------------------
 # EXPORT COUNTRIES MACHINE LEARNING SECTION
