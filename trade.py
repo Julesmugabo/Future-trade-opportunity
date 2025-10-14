@@ -29,9 +29,9 @@ st.title('Rwandan Exports Analysis')
 st.sidebar.header("NISR Trade opportunity project")
 try: 
     image = "https://raw.githubusercontent.com/Julesmugabo/Future-trade-opportunity/main/Logo.png"
-    st.sidebar.image(image, caption='Mufaxa Traders', width=200)
+    st.sidebar.image(image, caption='Mufaxa Export Labs', width=200)
 except:
-    st.sidebar.markdown("Mufaxa Traders")
+    st.sidebar.markdown("Mufaxa Export Labs")
 
 
 
@@ -53,7 +53,7 @@ df_raw = pd.concat(all_sheets.values(), ignore_index=True)
 #----------------------------------------
 # SIDEBAR ARRANGEMENT
 #----------------------------------------
-available_pages = ["overview","Commodity exports", "Country exports", "Commodity prediction model", "Country prediction model", "Policy recommendation","Youth & SME Engagement"]
+available_pages = ["overview","Commodity exports", "Country exports", "Commodity prediction model", "Country prediction model", "Policy recommendation","Youth & SME Engagement",'Future vision and impact']
 selected_page = st.sidebar.selectbox("Select the page to explore", available_pages)
 #-------------------------------------------------------------
 # PAGE ARRANGEMENT
@@ -61,7 +61,7 @@ selected_page = st.sidebar.selectbox("Select the page to explore", available_pag
 if selected_page == "overview":
     st.title(" Data overview")
     
-    st.markdown("""The aim of this dashboard is to predict countries and commodites that if we invest in now we shall make a good profit out of it from 2025Q3 - 2026Q4**.""")
+    st.markdown("""The aim of this dashboard is to predict countries and commodites that if we invest in now we shall make a good profit out of it from 2025Q3 - 2026Q4.""")
     
     st.markdown("""Below is Rwanda Exports destination countries dataset used.""")
     
@@ -94,6 +94,9 @@ if selected_page == "Youth & SME Engagement":
 
 if selected_page == "Policy recommendation":
     st.title("Policy recomendation")
+
+if selected_page == "Future vision and impact":
+    st.title("Mufaxa Trade Labs impact in society.")
     
     
 
@@ -651,7 +654,42 @@ if selected_page == "Youth & SME Engagement":
     if st.button("Submit"):
         st.success("Thank you for your submission.")
 
+#-----------------------------------------------
+# MUFAXA TRADE LABS
+#-----------------------------------------------
 
-############################################
-#############################################3
-# =====================================
+st.title("Mufaxa Export Labs")
+
+st.markdown("""
+### 65% of Rwandan population depend on agriculture and Farming as their job. After this analysis we saw that international demand is very high for some specific crops, so MUFAXA analysis shall help these low income farmers to strategise on what is to be demanded in future.
+    
+#Currently 25% of Rwanda GDP comes from agriculture and Farming where by through this analysis the percentage of agriculuture GDP contribution shall have increase on a high level.
+
+
+Our project goes beyond analysis — it introduces **new, export scalable solutions**.
+
+- **Mufaxa Export Labs** — Shall carry out hybrid accelerator helping SMEs and Youth to prepare certified export-ready products for Sweden & Thailand.
+- **FUND Agricultural products** — by giving loans to startup where unemployement rate shall reduce on a quick level. 
+
+---
+            
+### IMPACT TO RWANDANS
+Our target goals within **24 months**:
+-  Increase export value by **40–60%** for participating SMEs  
+-  Create **5,000–10,000 new jobs**  
+-  Onboard **200+ export-ready SMEs**   
+-  Empower youth — **30%** of beneficiaries will be youth-led businesses  
+
+---
+### Scalability Plan
+**Phase 1 (0–6 months):** Pilot in 3 districts with 20 SMEs  
+**Phase 2 (6–18 months):** Expand to 6 districts and integrate digital platform  
+**Phase 3 (18–36 months):** National scaling & regional (EAC/EU) expansion
+
+Key partners: **MINICOM, RDB, NIRDA, GIZ, AfDB, private exporters**
+
+---
+### Why It Matters
+
+This vision transforms data into **policy, technology, and opportunity** — empowering SMEs, creating jobs, and building sustainable growth.While Rwanda is position itself as a data-driven export leader in Africa
+""")
