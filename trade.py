@@ -618,39 +618,39 @@ if selected_page == "Youth & SME Engagement":
 #-----------------------------------------------
 # MUFAXA TRADE LABS
 #-----------------------------------------------
-
-st.title("Mufaxa Export Labs")
-
-st.markdown("""
-### 65% of Rwandan population depend on agriculture and Farming as their job. After this analysis we saw that international demand is very high for some specific crops, so MUFAXA analysis shall help these low income farmers to strategise on what is to be demanded in future.
+if selected_page == "Future vision and impact":
     
-#Currently 25% of Rwanda GDP comes from agriculture and Farming where by through this analysis the percentage of agriculuture GDP contribution shall have increase on a high level.
+
+    st.markdown("""
+    ### 65% of Rwandan population depend on agriculture and Farming as their job. After this analysis we saw that international demand is very high for some specific crops, so MUFAXA analysis shall help these low income farmers to strategise on what is to be demanded in future.
+        
+    #Currently 25% of Rwanda GDP comes from agriculture and Farming where by through this analysis the percentage of agriculuture GDP contribution shall have increase on a high level.
 
 
-Our project goes beyond analysis — it introduces **new, export scalable solutions**.
+    Our project goes beyond analysis — it introduces **new, export scalable solutions**.
 
-- **Mufaxa Export Labs** — Shall carry out hybrid accelerator helping SMEs and Youth to prepare certified export-ready products for Sweden & Thailand.
-- **FUND Agricultural products** — by giving loans to startup where unemployement rate shall reduce on a quick level. 
+    - **Mufaxa Export Labs** — Shall carry out hybrid accelerator helping SMEs and Youth to prepare certified export-ready products for Sweden & Thailand.
+    - **FUND Agricultural products** — by giving loans to startup where unemployement rate shall reduce on a quick level. 
 
----
-            
-### IMPACT TO RWANDANS
-Our target goals within **24 months**:
--  Increase export value by **40–60%** for participating SMEs  
--  Create **5,000–10,000 new jobs**  
--  Onboard **200+ export-ready SMEs**   
--  Empower youth — **30%** of beneficiaries will be youth-led businesses  
+    ---
+                
+    ### IMPACT TO RWANDANS
+    Our target goals within **24 months**:
+    -  Increase export value by **40–60%** for participating SMEs  
+    -  Create **5,000–10,000 new jobs**  
+    -  Onboard **200+ export-ready SMEs**   
+    -  Empower youth — **30%** of beneficiaries will be youth-led businesses  
 
----
-### Scalability Plan
-**Phase 1 (0–6 months):** Pilot in 3 districts with 20 SMEs  
-**Phase 2 (6–18 months):** Expand to 6 districts and integrate digital platform  
-**Phase 3 (18–36 months):** National scaling & regional (EAC/EU) expansion
+    ---
+    ### Scalability Plan
+    **Phase 1 (0–6 months):** Pilot in 3 districts with 20 SMEs  
+    **Phase 2 (6–18 months):** Expand to 6 districts and integrate digital platform  
+    **Phase 3 (18–36 months):** National scaling & regional (EAC/EU) expansion
 
-Key partners: **MINICOM, RDB, NIRDA, GIZ, AfDB, private exporters**
+    Key partners: **MINICOM, RDB, NIRDA, GIZ, AfDB, private exporters**
 
----
-### Why It Matters
+    ---
+    ### Why It Matters
 
-This vision transforms data into **policy, technology, and opportunity** — empowering SMEs, creating jobs, and building sustainable growth.While Rwanda is position itself as a data-driven export leader in Africa
-""")
+    This vision transforms data into **policy, technology, and opportunity** — empowering SMEs, creating jobs, and building sustainable growth.While Rwanda is position itself as a data-driven export leader in Africa
+    """)
