@@ -172,7 +172,7 @@ data_T_commodity = data_for_area_commodity.T
 if selected_page == "Commodity exports":
     st.title("Exports Commodity Page")
     # Tabs
-    tab1, tab2, tab3 = st.tabs(["Line chart", "Bar chart"])
+    tab1, tab2= st.tabs(["Line chart", "Bar chart"])
     with tab1:
         st.caption("Line chart for top 8 commodities")
         try:
@@ -214,20 +214,20 @@ if selected_page == "Commodity exports":
                 x=top10.values,
                 y=top10.index,
                 orientation='h',
-                title=f"Top 10 — {latest_col}",
+                title=f"Top 10 From 2023Q1-2025Q2",
                 color=top10.values,
                 color_continuous_scale='Blues'
             )
-            fig2.update_layout(height=300, xaxis_title="Value", yaxis_title="")
+            fig2.update_layout(height=500, xaxis_title="Value", yaxis_title="")
             st.plotly_chart(fig2, use_container_width=True)
         except Exception as e:
             st.warning(f"Couldn't draw top 10 bar: {e}")
 
         st.markdown("""This graph clearly shows ascending order of top Rwanda export commodities from 2023 to 2025.
                     
-                    From this graph we easly discover leading sectors that contributes to the GDP of Rwanda.
+                    From this graph we easly discover commodities that contributes to the exports of Rwanda.
                     
-                    we see that Rwanda's top Export commodity is manufactured materials and goods.  """)
+                    we see that Rwanda's top Export commodity is food and live animals.  """)
 
                 
 #------------------------------     
@@ -236,7 +236,7 @@ if selected_page == "Commodity exports":
 if selected_page == "Country exports":
 
     st.title("Export Country Page")
-    tab1, tab2, tab3 = st.tabs(["Stacked Area", "Bar chart"])
+    tab1, tab2 = st.tabs(["Stacked Area", "Bar chart"])
     with tab1:
         st.caption("Stacked area chart")
         try:
@@ -254,16 +254,16 @@ if selected_page == "Country exports":
                 ))
 
             fig.update_layout(
-                title="Top 8 Labels",
+                title="Top 8 Labels From 2023Q1-2025Q2",
                 xaxis_title="Period",
                 yaxis_title="Value",
                 legend_title="Labels",
-                height=300
+                height=500
             )
             st.plotly_chart(fig, use_container_width=True)
         except Exception as e:
             st.warning(f"Couldn't draw stacked area: {e}")
-
+        st.markdown(""" This graph shows us how different export destinations stayed in consistency and others how they met with fluctuations especially on 2025Q1, we need further analysis of what caused this huge fluctuation during this Quarter. And while observing this graph remember that the high in size of area a line covers, its proportional to its % distribution.""")
     with tab2:
         st.caption("Top 10 latest values")
         try:
@@ -274,15 +274,15 @@ if selected_page == "Country exports":
                 x=top10.values,
                 y=top10.index,
                 orientation='h',
-                title=f"Top 10 — {latest_col}",
+                title=f"Top 10 From 2023Q1-2025Q2",
                 color=top10.values,
                 color_continuous_scale='Blues'
             )
-            fig2.update_layout(height=300, xaxis_title="Value", yaxis_title="")
+            fig2.update_layout(height=500, xaxis_title="Value", yaxis_title="")
             st.plotly_chart(fig2, use_container_width=True)
         except Exception as e:
             st.warning(f"Couldn't draw top 10 bar: {e}")
-
+        st.markdown(""" This graph shows uS that for recent quarters form 2023Q1 TO 2025Q2 UNITED ARAB EMIRATES has been the top export destination of Rwandan products followed by DRC and CHINA. """)
 
 #---------------------------------
 # EXPORT COUNTRIES MACHINE LEARNING SECTION
