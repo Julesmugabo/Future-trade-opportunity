@@ -31,7 +31,7 @@ try:
     image = "https://raw.githubusercontent.com/Julesmugabo/Future-trade-opportunity/main/Logo.png"
     st.sidebar.image(image, caption='Mufaxa Export Labs', width=200)
 except:
-    st.sidebar.markdown("Mufaxa Export Labs")
+    st.sidebar.markdown("Mufaxa EExport Labs")
 
 
 
