@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import seaborn as sns
+import streamlit as st
 import joblib
 import io
 import plotly.express as px
@@ -18,15 +19,14 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 
-#1. Now the first thing is to make a page and its headers
-#--------------------------------------------------------
-st.set_page_config(page_title="Export opportunity in Rwanda", layout ='wide')
-st.title('Rwandan Exports Analysis')
+
 
 #-------------------------------------------------------------
 #3. SETTING SIDE BAR
 #-------------------------------------------------------------
-st.sidebar.header("NISR Trade opportunity project")
+st.set_page_config(layout="wide")
+
+st.sidebar.header("Opportunities in trade project")
 try: 
     image = "https://raw.githubusercontent.com/Julesmugabo/Future-trade-opportunity/main/Logo.png"
     st.sidebar.image(image, caption='Mufaxa Export Labs', width=200)
@@ -50,36 +50,85 @@ selected_sheet = ['ExportCountry', 'ExportsCommodity']
 df_raw = pd.concat(all_sheets.values(), ignore_index=True)
 
 
+
+
+
+#----------------------------------------
+# DATA CLEANING FOR COMMODITY
+#----------------------------------------
+raw_df = df_exports.copy()
+
+# 1. Detect header row as the row BEFORE the first numeric row
+numeric_row = raw_df.apply(lambda row: pd.to_numeric(row, errors='coerce').notna().any(), axis=1)
+first_numeric_index = numeric_row.idxmax()   # first True row
+header_row = first_numeric_index - 1         # header is one row above
+
+print("Detected header row:", header_row)
+
+# 2. Reload starting from header_row
+clean_df = pd.read_excel(file_path, sheet_name='ExportCountry', skiprows=header_row)
+
+# 3. Remove unwanted rows
+unwanted = ["Total Estimates", "Source: NISR"]
+clean_df = clean_df[~clean_df.iloc[:, 0].isin(unwanted)]
+
+# 4. Keep only first 11 columns: Country + 10 quarters
+clean_df = clean_df.iloc[:, :11]
+
+# 5. Rename first column
+clean_df.rename(columns={clean_df.columns[0]: "Year and Period"}, inplace=True)
+
+# 6. Reset index
+clean_df.reset_index(drop=True, inplace=True)
+
+clean_df.head(20)
+
+#----------------------------------------
+# DATA CLEANING FOR COMMODITY
+#----------------------------------------
+raw_df = df_exports.copy()
+
+# 1. Detect header row as the row BEFORE the first numeric row
+numeric_row = raw_df.apply(lambda row: pd.to_numeric(row, errors='coerce').notna().any(), axis=1)
+first_numeric_index = numeric_row.idxmax()   # first True row
+header_row = first_numeric_index - 1         # header is one row above
+
+print("Detected header row:", header_row)
+
+# 2. Reload starting from header_row
+clean_df = pd.read_excel(file_path, sheet_name='ExportCountry', skiprows=header_row)
+
+# 3. Remove unwanted rows
+unwanted = ["Total Estimates", "Source: NISR"]
+clean_df = clean_df[~clean_df.iloc[:, 0].isin(unwanted)]
+
+# 4. Keep only first 11 columns: Country + 10 quarters
+clean_df = clean_df.iloc[:, :11]
+
+# 5. Rename first column
+clean_df.rename(columns={clean_df.columns[0]: "Year and Period"}, inplace=True)
+
+# 6. Reset index
+clean_df.reset_index(drop=True, inplace=True)
+
+clean_df.head(20)
+
 #----------------------------------------
 # SIDEBAR ARRANGEMENT
 #----------------------------------------
-available_pages = ["overview","Commodity exports", "Country exports", "Commodity prediction model", "Country prediction model", "Policy recommendation","Youth & SME Engagement",'Future vision and impact']
+available_pages = ["Commodity exports", "Country exports", "Commodity prediction model", "Country prediction model", "Policy recommendation","overview"]
 selected_page = st.sidebar.selectbox("Select the page to explore", available_pages)
 #-------------------------------------------------------------
 # PAGE ARRANGEMENT
 #-------------------------------------------------------------
-if selected_page == "overview":
-    st.title(" Data overview")
-    
-    st.markdown("""The aim of this dashboard is to predict countries and commodites that if we invest in now we shall make a good profit out of it from 2025Q3 - 2026Q4.""")
-    
-    st.markdown("""Below is Rwanda Exports destination countries dataset used.""")
-    
-    st.dataframe(df_exports)
-    
-    st.download_button("Download export destination Data", df_exports.to_csv(index=False).encode(), "exports_destination.csv")
-    st.markdown("""Commodities exported from Rwanda dataset.""")
-    st.dataframe(df_commodity)
-    st.download_button("Download commodities exported Data", df_exports.to_csv(index=False).encode(), "Commodity_exported.csv")
-
 
 if selected_page == "Commodity exports":
-    st.title(" Exports Commodity Analysis")
-    st.dataframe(df_commodity)
+    st.title(" Rwanda's future trade opportunity analysis")
+    st.markdown("""The aim of this dashboard is to predict countries and commodites that if we invest in now we shall make a good profit out of it from 2025Q3 - 2026Q4.""")
+    
 
 if selected_page == "Country exports":
-    st.title(" Export Country Page")
-    st.dataframe(df_exports)
+    st.title(" Export Country Page") 
 
 if selected_page == "Commodity prediction model":
     st.title("Machine Learning Forecast – ExportsCommodity Growth Prediction")
@@ -94,10 +143,33 @@ if selected_page == "Youth & SME Engagement":
 
 if selected_page == "Policy recommendation":
     st.title("Policy recomendation")
+    
 
 if selected_page == "Future vision and impact":
     st.title("Mufaxa Trade Labs impact in society.")
+
+if selected_page == "overview":
+    st.title(" Data overview")
     
+    
+    st.markdown("""Below is Rwanda Exports destination countries dataset used.""")
+    
+    st.dataframe(df_exports)
+    
+    st.download_button("Download export destination Data", df_exports.to_csv(index=False).encode(), "exports_destination.csv")
+    st.markdown("""Commodities exported from Rwanda dataset.""")
+    st.dataframe(df_commodity)
+    st.download_button("Download commodities exported Data", df_exports.to_csv(index=False).encode(), "Commodity_exported.csv")
+    st.markdown("""Track 1: Data for Export Growth:
+
+                    Challenge: Identify Rwanda’s next big export opportunity.
+
+                    Analyze global trade and export data.
+                    Predict demand using machine learning.
+                    Visualize insights via dashboards or mobile alerts.
+                    Propose policy recommendations for export strategy.
+                    Promote youth and SME engagement in export sectors.
+                    """)
     
 
 
@@ -171,118 +243,153 @@ data_T_commodity = data_for_area_commodity.T
 #------------------------------
 if selected_page == "Commodity exports":
     st.title("Exports Commodity Page")
-    # Tabs
-    tab1, tab2= st.tabs(["Line chart", "Bar chart"])
-    with tab1:
-        st.caption("Line chart for top 8 commodities")
-        try:
-            x = data_T_commodity.index
-            y = data_T_commodity.values.T  
 
-            fig = go.Figure()
-            for col in data_T_commodity.columns:
-                fig.add_trace(go.Scatter(
-                    x=x, 
-                    y=data_T_commodity[col], 
-                    mode='lines',
-                    name=col
-                ))
+    # ==========================
+    # 1. LINE CHART (TOP 8 COMMODITIES)
+    # ==========================
+    st.caption("Line chart for top 8 commodities")
 
-            fig.update_layout(
-                title="Top 8 Labels",
-                xaxis_title="Period",
-                yaxis_title="Value",
-                legend_title="Labels",
-                height=500
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
-            st.warning(f"Couldn't draw line chart: {e}")
-        st.markdown(""" This graph tells about quartely trends of top export labels from 2023q1 to 2025q2.
-                    
-                    From the graph, we see that Food and live animals stayed leading in consistency.
-                    
-                    Other commodities & transactionss and crude materials... remained stable with little flactuations.""")
+    try:
+        x = data_T_commodity.index
+        y = data_T_commodity.values.T  
 
-    with tab2:
-        st.caption("Big 10 latest values")
-        try:
-            latest_col = working_numeric_commodity.columns[-1]
-            top10 = working_numeric_commodity[latest_col].nlargest(10).sort_values()
+        fig = go.Figure()
+        for col in data_T_commodity.columns:
+            fig.add_trace(go.Scatter(
+                x=x, 
+                y=data_T_commodity[col], 
+                mode='lines',
+                name=col
+            ))
 
-            fig2 = px.bar(
-                x=top10.values,
-                y=top10.index,
-                orientation='h',
-                title=f"Top 10 From 2023Q1-2025Q2",
-                color=top10.values,
-                color_continuous_scale='Blues'
-            )
-            fig2.update_layout(height=500, xaxis_title="Value", yaxis_title="")
-            st.plotly_chart(fig2, use_container_width=True)
-        except Exception as e:
-            st.warning(f"Couldn't draw top 10 bar: {e}")
+        fig.update_layout(
+            title="Top 8 Labels",
+            xaxis_title="Period",
+            yaxis_title="Value",
+            legend_title="Labels",
+            height=500
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
-        st.markdown("""This graph clearly shows ascending order of top Rwanda export commodities from 2023 to 2025.
-                    
-                    From this graph we easly discover commodities that contributes to the exports of Rwanda.
-                    
-                    we see that Rwanda's top Export commodity is food and live animals.  """)
+    except Exception as e:
+        st.warning(f"Couldn't draw line chart: {e}")
+
+    st.markdown("""
+    This graph tells about quartely trends of top export labels from 2023q1 to 2025q2.
+    
+    From the graph, we see that Food and live animals stayed leading in consistency.
+    
+    Other commodities & transactions and crude materials... remained stable with little flactuations.
+    """)
+
+    st.markdown("---")  # separator line
+
+
+    # ==========================
+    # 2. BAR CHART (TOP 10 LATEST VALUES)
+    # ==========================
+    st.caption("Big 10 latest values")
+
+    try:
+        latest_col = working_numeric_commodity.columns[-1]
+        top10 = working_numeric_commodity[latest_col].nlargest(10).sort_values()
+
+        fig2 = px.bar(
+            x=top10.values,
+            y=top10.index,
+            orientation='h',
+            title=f"Top 10 From 2023Q1-2025Q2",
+            color=top10.values,
+            color_continuous_scale='Blues'
+        )
+        fig2.update_layout(height=500, xaxis_title="Value", yaxis_title="")
+        st.plotly_chart(fig2, use_container_width=True)
+
+    except Exception as e:
+        st.warning(f"Couldn't draw top 10 bar: {e}")
+
+    st.markdown("""
+    This graph clearly shows ascending order of top Rwanda export commodities from 2023 to 2025.
+    
+    From this graph we easily discover commodities that contribute to the exports of Rwanda.
+    
+    We see that Rwanda's top export commodity is Food and live animals.
+    """)
 
                 
 #------------------------------     
-# GRAPHS FOR EXPORTCOUNTRIES
+# GRAPHS FOR EXPORT COUNTRIES  
 #------------------------------
 if selected_page == "Country exports":
 
-    st.title("Export Country Page")
-    tab1, tab2 = st.tabs(["Stacked Area", "Bar chart"])
-    with tab1:
-        st.caption("Stacked area chart")
-        try:
-            x = data_T_country.index
-            y = data_T_country.values.T  
+    # ==========================
+    # 1. STACKED AREA CHART
+    # ==========================
+    st.caption("Stacked area chart")
 
-            fig = go.Figure()
-            for col in data_T_country.columns:
-                fig.add_trace(go.Scatter(
-                    x=x, 
-                    y=data_T_country[col], 
-                    mode='lines',
-                    stackgroup='one', 
-                    name=col
-                ))
+    try:
+        x = data_T_country.index
+        y = data_T_country.values.T  
 
-            fig.update_layout(
-                title="Top 8 Labels From 2023Q1-2025Q2",
-                xaxis_title="Period",
-                yaxis_title="Value",
-                legend_title="Labels",
-                height=500
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
-            st.warning(f"Couldn't draw stacked area: {e}")
-        st.markdown(""" This graph shows us how different export destinations stayed in consistency and others how they met with fluctuations especially on 2025Q1, we need further analysis of what caused this huge fluctuation during this Quarter. And while observing this graph remember that the high in size of area a line covers, its proportional to its % distribution.""")
-    with tab2:
-        st.caption("Top 10 latest values")
-        try:
-            latest_col = working_numeric_country.columns[-1]
-            top10 = working_numeric_country[latest_col].nlargest(10).sort_values()
+        fig = go.Figure()
+        for col in data_T_country.columns:
+            fig.add_trace(go.Scatter(
+                x=x, 
+                y=data_T_country[col], 
+                mode='lines',
+                stackgroup='one',
+                name=col
+            ))
 
-            fig2 = px.bar(
-                x=top10.values,
-                y=top10.index,
-                orientation='h',
-                title=f"Top 10 From 2023Q1-2025Q2",
-                color=top10.values,
-                color_continuous_scale='Blues'
-            )
-            fig2.update_layout(height=500, xaxis_title="Value", yaxis_title="")
-            st.plotly_chart(fig2, use_container_width=True)
-        except Exception as e:
-            st.warning(f"Couldn't draw top 10 bar: {e}")
-        st.markdown(""" This graph shows uS that for recent quarters form 2023Q1 TO 2025Q2 UNITED ARAB EMIRATES has been the top export destination of Rwandan products followed by DRC and CHINA. """)
+        fig.update_layout(
+            title="Top 8 Labels From 2023Q1-2025Q2",
+            xaxis_title="Period",
+            yaxis_title="Value",
+            legend_title="Labels",
+            height=500
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    except Exception as e:
+        st.warning(f"Couldn't draw stacked area: {e}")
+
+    st.markdown("""
+    This graph shows us how different export destinations stayed in consistency and others how they met with 
+    fluctuations especially on 2025Q1. We need further analysis of what caused this huge fluctuation during 
+    this Quarter. And while observing this graph remember that the size of the area a line covers is 
+    proportional to its % distribution.
+    """)
+
+    st.markdown("---")  # separator line
+
+
+    # ==========================
+    # 2. BAR CHART (TOP 10 LATEST VALUES)
+    # ==========================
+    st.caption("Top 10 latest values")
+
+    try:
+        latest_col = working_numeric_country.columns[-1]
+        top10 = working_numeric_country[latest_col].nlargest(10).sort_values()
+
+        fig2 = px.bar(
+            x=top10.values,
+            y=top10.index,
+            orientation='h',
+            title=f"Top 10 From 2023Q1-2025Q2",
+            color=top10.values,
+            color_continuous_scale='Blues'
+        )
+        fig2.update_layout(height=500, xaxis_title="Value", yaxis_title="")
+        st.plotly_chart(fig2, use_container_width=True)
+
+    except Exception as e:
+        st.warning(f"Couldn't draw top 10 bar: {e}")
+
+    st.markdown("""
+    This graph shows us that for recent quarters from 2023Q1 to 2025Q2, the United Arab Emirates has been 
+    the top export destination of Rwandan products, followed by DRC and China.
+    """)
 
 #---------------------------------
 # EXPORT COUNTRIES MACHINE LEARNING SECTION
@@ -316,7 +423,7 @@ if selected_page == "Country prediction model":
             '2024Q4_growth', '2025Q1_growth', '2025Q2_growth']]
 
     y = df['total_growth']
-
+ 
     # Train model
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -546,111 +653,32 @@ if selected_page == "Commodity prediction model":
 # POLICY RECOMENDATION
 #-----------------------------------------------------------
 if selected_page == "Policy recommendation":
-    st.markdown("""
-    ### Policies to enhance Rwanda's Export Opportunities (2025-2026)
-        ###  Key Insights from Our Analysis
-    Our analysis reveals **promising export opportunities** for Rwandan investors:  
+    # Load the infographic
+    image_path = r"C:\Users\PC\OneDrive\Desktop\cloned\Future-trade-opportunity\streamlit dash.png"
+    infographic = Image.open(image_path)
 
-    - **Thailand and Sweden** have emerged as highly potential markets:  
-    - Exports to **Thailand** are projected to **grow by 93.3%**.  
-    - Exports to **Sweden** have already **grown by 47%**, with predictions showing continued upward trends.  
+    # Display it
+    st.image (infographic,use_container_width=True)
+    # Convert image to bytes (so no need to read from assets folder)
+    img_bytes = io.BytesIO()
+    infographic.save(img_bytes, format="PNG")
+    img_bytes.seek(0)
 
-    - **Agricultural and farming products** remain a major opportunity:  
-    - Exports of **animal and vegetable oils, fats, and waxes** are expected to **increase by 21%**.  
-
-    - **Tobacco and beverage-related SMEs** also show strong potential,  
-    with expected export growth of around **11%**.
-
-    These insights confirm that **Rwanda’s export sector is expanding** — and those who act now will benefit the most.
-
-                ### Policies to apply.        
-            - Rwanda should make trade agreement with Thailand and Sweden about tax reduction and improved logistics on its exports.
-            - Governmental organisations can help providing market research analysis to Rwandan traders.
-            - Promote agro industries among small and medium sized  busineses
-            - Funding agricultural projects made by youth
-            - Developing manufucturing industrie    
-                """)
-#-----------------------------------------------------------
-# Youth and SME Engagement
-#-----------------------------------------------------------
-if selected_page == "Youth & SME Engagement":
-    st.markdown("""
-    ### Engaging in Rwanda’s Growing Trade Opportunities by  
-           
-                
-    This is a **call to action** for all **Rwandan youth** and **small & medium-sized enterprises (SMEs)** to seize the opportunities available in **export trade**.  
-    Through informed decision-making and data-driven insights, every participant can **grow an existing business** or **launch a new one** with confidence about **where and how to export**.  
+    # Download button
+    st.download_button(
+        label="Download Infographic",
+        data=img_bytes,
+        file_name="rwanda_export_infographic.png",
+        mime="image/png"
+    )
 
 
-    ---
-
-    ###  Opportunity for Youth and Entrepreneurs
-    This initiative offers a pathway for:
-    - **Unemployed youth** to start export-oriented agricultural ventures.  
-    - **Small businesses** to scale and reach international markets.  
-    - **Innovators** to make data-informed trade decisions that transform local industries.
-
-    ---
-
-    ###  About Mufaxa Traders
-    At **Mufaxa Traders**, we empower **unemployed youth** engaged in agriculture through:  
-    - **Financial support** — providing startup and expansion loans.  
-    - **Capacity building** — training in innovation and **data-informed decision-making**.  
- 
-
-    ---
-
-    ###  Get Involved
-    If you wish to take part in this opportunity and grow your business through export trade,  
-    **fill out the form below to get started**.  
-
-    """)
 
     name = st.text_input("Your name")
     status = st.text_input("youth or SME")
     business = st.text_input("Your Business or Startup Name")
-    email = st.text_input("Email:")
+    email = st.text_input("Email to send on monthly Global trade insights:")
     phone_number = st.text_input("Phone number")
     interest = st.text_area(" Are you intrested in getting a loan from Mufaxa traders or capacity building")
     if st.button("Submit"):
         st.success("Thank you for your submission.")
-
-#-----------------------------------------------
-# MUFAXA TRADE LABS
-#-----------------------------------------------
-if selected_page == "Future vision and impact":
-    
-
-    st.markdown("""
-    ### 65% of Rwandan population depend on agriculture and Farming as their job. After this analysis we saw that international demand is very high for some specific crops, so MUFAXA analysis shall help these low income farmers to strategise on what is to be demanded in future.
-        
-    #Currently 25% of Rwanda GDP comes from agriculture and Farming where by through this analysis the percentage of agriculuture GDP contribution shall have increase on a high level.
-
-
-    Our project goes beyond analysis — it introduces **new, export scalable solutions**.
-
-    - **Mufaxa Export Labs** — Shall carry out hybrid accelerator helping SMEs and Youth to prepare certified export-ready products for Sweden & Thailand.
-    - **FUND Agricultural products** — by giving loans to startup where unemployement rate shall reduce on a quick level. 
-
-    ---
-                
-    ### IMPACT TO RWANDANS
-    Our target goals within **24 months**:
-    -  Increase export value by **40–60%** for participating SMEs  
-    -  Create **5,000–10,000 new jobs**  
-    -  Onboard **200+ export-ready SMEs**   
-    -  Empower youth — **30%** of beneficiaries will be youth-led businesses  
-
-    ---
-    ### Scalability Plan
-    **Phase 1 (0–6 months):** Pilot in 3 districts with 20 SMEs  
-    **Phase 2 (6–18 months):** Expand to 6 districts and integrate digital platform  
-    **Phase 3 (18–36 months):** National scaling & regional (EAC/EU) expansion
-
-    Key partners: **MINICOM, RDB, NIRDA, GIZ, AfDB, private exporters**
-
-    ---
-    ### Why It Matters
-
-    This vision transforms data into **policy, technology, and opportunity** — empowering SMEs, creating jobs, and building sustainable growth.While Rwanda is position itself as a data-driven export leader in Africa
-    """)
