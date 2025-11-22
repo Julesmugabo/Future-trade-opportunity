@@ -654,25 +654,36 @@ if selected_page == "Commodity prediction model":
 #-----------------------------------------------------------
 if selected_page == "Policy recommendation":
     # Load the infographic
-    image_path = r"C:\Users\PC\OneDrive\Desktop\cloned\Future-trade-opportunity\streamlit dash.png"
-    infographic = Image.open(image_path)
+    import requests
+    from PIL import Image
+    import io
+    import streamlit as st
 
-    # Display it
-    st.image (infographic,use_container_width=True)
-    # Convert image to bytes (so no need to read from assets folder)
-    img_bytes = io.BytesIO()
-    infographic.save(img_bytes, format="PNG")
-    img_bytes.seek(0)
+    # Use the RAW GitHub URL
+    image_url = "https://raw.githubusercontent.com/Julesmugabo/Future-trade-opportunity/main/streamlit%20dash.png"
+
+    # Download the image from GitHub
+    response = requests.get(image_url)
+    img_bytes = io.BytesIO(response.content)
+
+    # Open image with PIL
+    infographic = Image.open(img_bytes)
+
+    # Display in Streamlit
+    st.image(infographic, use_container_width=True)
+
+    # Prepare for download
+    download_bytes = io.BytesIO()
+    infographic.save(download_bytes, format="PNG")
+    download_bytes.seek(0)
 
     # Download button
     st.download_button(
         label="Download Infographic",
-        data=img_bytes,
+        data=download_bytes,
         file_name="rwanda_export_infographic.png",
         mime="image/png"
     )
-
-
 
     name = st.text_input("Your name")
     status = st.text_input("youth or SME")
